@@ -22,6 +22,16 @@ function getAllData(dataStore) {
   });
 }
 
+function deleteData(st, id) {
+  return dbPromise.then((db) => {
+    const tx = db.transaction(st, "readwrite");
+    const store = tx.objectStore(st);
+
+    store.delete(id);
+    return tx.complete;
+  });
+}
+
 function clearData(st) {
   return dbPromise.then((db) => {
     const tx = db.transaction(st, "readwrite");
