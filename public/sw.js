@@ -1,9 +1,14 @@
-var CACHE_STATIC_NAME = "static-v15";
+importScripts("/src/js/idb.js");
+importScripts("/src/js/utils.js");
+
+var CACHE_STATIC_NAME = "static-v16";
 var CACHE_DYNAMIC_NAME = "dynamic-v2";
 var STATIC_FILES = [
   "/",
   "/index.html",
   "/offline.html",
+  "/src/js/idb.js",
+  "/src/js/utils.js",
   "/src/js/app.js",
   "/src/js/feed.js",
   "/src/js/promise.js",
@@ -74,21 +79,23 @@ function isInArray(string, array) {
 }
 
 self.addEventListener("fetch", function (event) {
-  var url = "https://httpbin.org/get";
+  var url =
+    "https://pwa-learn-69738-default-rtdb.asia-southeast1.firebasedatabase.app/posts";
 
   // Cache strategy for Handle the dynamic assets (Cache, then network)
   // We use this strategy for the dynamic assets, because we want the displayed data is the latest one, but keep the initial load fast with the help of cache
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
-      caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
-        return fetch(event.request).then(function (res) {
-          // trimCache(CACHE_DYNAMIC_NAME, 3);
-          cache.put(event.request, res.clone());
-          return res;
+      fetch(event.request).then(function (res) {
+        var clonedRes = res.clone();
+        clonedRes.json().then(function (data) {
+          for (var key in data) {
+            writeData("posts", data[key]);
+          }
         });
+        return res;
       })
     );
-
     // Cache strategy for static assets (Cache only)
     // We use this strategy for the static assets, because we don't want to go for network for these kind of request, because we definitely have stored the data in the cache in the 'install' phase
   } else if (isInArray(event.request.url, STATIC_FILES)) {
