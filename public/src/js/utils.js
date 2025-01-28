@@ -21,3 +21,14 @@ function getAllData(dataStore) {
     return store.getAll();
   });
 }
+
+function clearData(st) {
+  return dbPromise.then((db) => {
+    const tx = db.transaction(st, "readwrite");
+    const store = tx.objectStore(st);
+
+    store.clear();
+
+    return tx.complete;
+  });
+}
