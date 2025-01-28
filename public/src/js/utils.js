@@ -12,3 +12,12 @@ function writeData(dataStore, data) {
     return tx.complete;
   });
 }
+
+function getAllData(dataStore) {
+  return dbPromise.then(function (db) {
+    const tx = db.transaction(dataStore, "readonly");
+    const store = tx.objectStore(dataStore);
+
+    return store.getAll();
+  });
+}
