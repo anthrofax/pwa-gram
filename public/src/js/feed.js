@@ -4,6 +4,11 @@ var closeCreatePostModalButton = document.querySelector(
   "#close-create-post-modal-btn"
 );
 var sharedMomentsArea = document.querySelector("#shared-moments");
+const feedForm = document
+  .querySelector("#create-post")
+  .getElementsByTagName("form");
+const titleInput = document.querySelector('#title')
+const locationInput = document.querySelector('#location')
 
 function openCreatePostModal() {
   createPostArea.style.display = "block";
@@ -118,3 +123,15 @@ if ("indexedDB" in window) {
     }
   });
 }
+
+feedForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert("Harap isi semua kolom")
+    return;
+  }
+
+  closeCreatePostModal();
+  
+})
