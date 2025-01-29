@@ -7,8 +7,8 @@ var sharedMomentsArea = document.querySelector("#shared-moments");
 const feedForm = document
   .querySelector("#create-post")
   .getElementsByTagName("form");
-const titleInput = document.querySelector('#title')
-const locationInput = document.querySelector('#location')
+const titleInput = document.querySelector("#title");
+const locationInput = document.querySelector("#location");
 
 function openCreatePostModal() {
   createPostArea.style.display = "block";
@@ -124,20 +124,38 @@ if ("indexedDB" in window) {
   });
 }
 
-feedForm.addEventListener('submit', async function(e) {
+feedForm.addEventListener("submit", function (e) {
   e.preventDefault();
 
-  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
-    alert("Harap isi semua kolom")
+  if (titleInput.value.trim() === "" || locationInput.value.trim() === "") {
+    alert("Harap isi semua kolom");
     return;
   }
 
   closeCreatePostModal();
 
-  if ('serviceWorker' in window && "SyncManager" in window) {
-    const sw = await navigator.serviceWorker.ready;
+  if ("serviceWorker" in window && "SyncManager" in window) {
+    navigator.serviceWorker.ready.then((sw) => {
+      const newData = {
+        id: new Date(),
+        title: titleInput.value,
+        location: locationInput.value,
+      };
 
-    sw.sync.register('sync-new-post')
+      writeData("sync-posts", newData)
+        .then(() => {
+          return sw.sync.register("sync-new-post");
+        })
+        .then(() => {
+          const snackbarContainer = document.querySelector(
+            "#confirmation-toast"
+          );
+          const data = { message: "Unggahan kamu berhasil di selaraskan" };
+          snackbarContainer.MaterialSnackbar.showSnackbar(data);
+        })
+        .catch((err) => {
+          console.log("BG Sync Error", err);
+        });
+    });
   }
-
-})
+});
