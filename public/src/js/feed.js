@@ -161,7 +161,7 @@ feedForm.addEventListener("submit", function (e) {
     console.log('Sync Manager Supported')
     navigator.serviceWorker.ready.then((sw) => {
       const newData = {
-        id: new Date(),
+        id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
         image:

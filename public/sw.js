@@ -200,7 +200,7 @@ self.addEventListener("sync", (event) => {
       getAllData("sync-posts").then(function (data) {
         for (const feed of data) {
           fetch(
-            "https://pwa-learn-69738-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+            "https://us-central1-pwa-learn-69738.cloudfunctions.net/storePostData",
             {
               method: "POST",
               body: JSON.stringify(feed),
@@ -211,8 +211,11 @@ self.addEventListener("sync", (event) => {
             }
           )
             .then((res) => {
+              res.json().then((data) => {
+                console.log(data);
+                deleteData("sync-posts", data.id);
+              });
               console.log("Sent data", res);
-              if (res.ok) deleteData("sync-posts", feed.id); // Doesn't work properly yet
             })
             .catch((err) => console.log("Error when sending data", err));
         }
