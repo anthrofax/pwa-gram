@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utils.js");
 
-var CACHE_STATIC_NAME = "static-v16";
+var CACHE_STATIC_NAME = "static-v13";
 var CACHE_DYNAMIC_NAME = "dynamic-v2";
 var STATIC_FILES = [
   "/",
@@ -95,9 +95,7 @@ self.addEventListener("fetch", function (event) {
           })
           .then(function (data) {
             for (var key in data) {
-              writeData("posts", data[key]).then(() => {
-                deleteData("posts", key);
-              });
+              writeData("posts", data[key]);
             }
           });
 
@@ -193,3 +191,32 @@ self.addEventListener("fetch", function (event) {
 //     fetch(event.request)
 //   );
 // });
+
+self.addEventListener("sync", (event) => {
+  console.log("[Service Worker] Background syncing", event);
+  if (event.tag === "sync-new-posts") {
+    console.log("[Service Worker] Syncing new Posts");
+    event.waitUntil(
+      getAllData("sync-posts").then(function (data) {
+        for (const feed of data) {
+          fetch(
+            "https://pwa-learn-69738-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+            {
+              method: "POST",
+              body: JSON.stringify(feed),
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+            }
+          )
+            .then((res) => {
+              console.log("Sent data", res);
+              if (res.ok) deleteData("sync-posts", feed.id); // Doesn't work properly yet
+            })
+            .catch((err) => console.log("Error when sending data", err));
+        }
+      })
+    );
+  }
+});

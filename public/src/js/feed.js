@@ -6,7 +6,7 @@ var closeCreatePostModalButton = document.querySelector(
 var sharedMomentsArea = document.querySelector("#shared-moments");
 const feedForm = document
   .querySelector("#create-post")
-  .getElementsByTagName("form");
+  .getElementsByTagName("form")[0];
 const titleInput = document.querySelector("#title");
 const locationInput = document.querySelector("#location");
 
@@ -124,6 +124,29 @@ if ("indexedDB" in window) {
   });
 }
 
+function sendData() {
+  fetch(
+    "https://pwa-learn-69738-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        id: new Date(),
+        title: titleInput.value,
+        location: locationInput.value,
+        image:
+          "https://firebasestorage.googleapis.com/v0/b/pwa-learn-69738.firebasestorage.app/o/sf-boat.jpg?alt=media&token=2104cd34-857b-494e-9297-c61bf20725ff",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    }
+  ).then(function (res) {
+    console.log("Sent data", res);
+    updateUI();
+  });
+}
+
 feedForm.addEventListener("submit", function (e) {
   e.preventDefault();
 
@@ -134,17 +157,20 @@ feedForm.addEventListener("submit", function (e) {
 
   closeCreatePostModal();
 
-  if ("serviceWorker" in window && "SyncManager" in window) {
+  if ("serviceWorker" in navigator && "SyncManager" in window) {
+    console.log('Sync Manager Supported')
     navigator.serviceWorker.ready.then((sw) => {
       const newData = {
         id: new Date(),
         title: titleInput.value,
         location: locationInput.value,
+        image:
+          "https://firebasestorage.googleapis.com/v0/b/pwa-learn-69738.firebasestorage.app/o/sf-boat.jpg?alt=media&token=2104cd34-857b-494e-9297-c61bf20725ff",
       };
 
       writeData("sync-posts", newData)
         .then(() => {
-          return sw.sync.register("sync-new-post");
+          return sw.sync.register("sync-new-posts");
         })
         .then(() => {
           const snackbarContainer = document.querySelector(
@@ -157,5 +183,8 @@ feedForm.addEventListener("submit", function (e) {
           console.log("BG Sync Error", err);
         });
     });
+  } else {
+    console.log("Service Worker not supported")
+    sendData();
   }
 });
