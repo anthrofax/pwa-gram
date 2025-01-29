@@ -124,7 +124,7 @@ if ("indexedDB" in window) {
   });
 }
 
-feedForm.addEventListener('submit', function(e) {
+feedForm.addEventListener('submit', async function(e) {
   e.preventDefault();
 
   if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
@@ -133,5 +133,11 @@ feedForm.addEventListener('submit', function(e) {
   }
 
   closeCreatePostModal();
-  
+
+  if ('serviceWorker' in window && "SyncManager" in window) {
+    const sw = await navigator.serviceWorker.ready;
+
+    sw.sync.register('sync-new-post')
+  }
+
 })
