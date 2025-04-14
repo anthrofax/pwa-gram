@@ -223,3 +223,24 @@ self.addEventListener("sync", (event) => {
     );
   }
 });
+
+self.addEventListener('notificationclick', (event) => {
+  const notification = event.notification; // Notifikasi yang diklik
+  const action = event.action; // Action ID (jika ada)
+
+  // Log informasi tentang notifikasi
+  console.log(notification);
+
+  // Menangani klik berdasarkan action
+  if (action === 'confirm') {
+    console.log('Confirm was chosen');
+    notification.close(); // Menutup notifikasi secara manual
+  } else if (action === 'cancel') {
+    console.log('Cancel was chosen');
+    notification.close(); // Menutup notifikasi
+  } else {
+    // Jika pengguna mengklik notifikasi tanpa memilih action
+    console.log('Notification clicked directly');
+    notification.close();
+  }
+});

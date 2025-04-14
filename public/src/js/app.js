@@ -38,19 +38,17 @@ function displayConfirmationNotification() {
         {
           action: 'confirm', 
           title: 'Iya', 
-          icon: '/src/images/icons/camera-icon.png', 
+          icon: '/src/images/icons/app-icon-96x96.png', 
         },
         {
           action: 'cancel', 
           title: 'Batalkan', 
-          icon: '/src/images/icons/camera-icon.png', 
+          icon: '/src/images/icons/app-icon-96x96.png', 
         },
       ],
     }
     
-    console.log('test')
     navigator.serviceWorker.ready.then(function (swreg) {
-      console.log('test 2')
       swreg.showNotification("Berhasil berlangganan! (From SW)", options);
     });
   }
