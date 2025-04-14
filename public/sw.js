@@ -244,3 +244,11 @@ self.addEventListener('notificationclick', (event) => {
     notification.close();
   }
 });
+
+self.addEventListener('notificationclose', (event) => {
+  const notification = event.notification; // Notifikasi yang ditutup
+
+  // Log informasi tentang penutupan
+  console.log('Notification was closed');
+  console.log(notification);
+});
