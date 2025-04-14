@@ -26,13 +26,20 @@ window.addEventListener('beforeinstallprompt', function (event) {
 function displayConfirmationNotification() {
   if ('serviceWorker' in navigator) {
     const options = {
-      body: "You successfully subscribed to our Notification service!",
+      body: "Kamu telah berhasil berlangganan di layanan notifikasi kami!",
+      icon: '/src/images/icons/app-icon-96x96.png',
+      image: '/src/images/sf-boat.jpg',
+      dir: 'ltr',
+      lang: 'en-US', // BCP 47 language tag
+      vibrate: [100, 50, 200],
+      tag: 'confirm-notification',
+      renotify: true
     }
     
     console.log('test')
     navigator.serviceWorker.ready.then(function (swreg) {
       console.log('test 2')
-      swreg.showNotification("Successfully subscribed! (From SW)", options);
+      swreg.showNotification("Berhasil berlangganan! (From SW)", options);
     });
   }
 }
