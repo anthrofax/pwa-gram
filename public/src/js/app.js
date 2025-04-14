@@ -33,7 +33,19 @@ function displayConfirmationNotification() {
       lang: 'en-US', // BCP 47 language tag
       vibrate: [100, 50, 200],
       tag: 'confirm-notification',
-      renotify: true
+      renotify: true,
+      actions: [
+        {
+          action: 'confirm', 
+          title: 'Iya', 
+          icon: '/src/images/icons/camera-icon.png', 
+        },
+        {
+          action: 'cancel', 
+          title: 'Batalkan', 
+          icon: '/src/images/icons/camera-icon.png', 
+        },
+      ],
     }
     
     console.log('test')
