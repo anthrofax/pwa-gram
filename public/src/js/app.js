@@ -23,6 +23,26 @@ window.addEventListener('beforeinstallprompt', function (event) {
   return false;
 });
 
+function configurePushSub() {
+  if (!('serviceWorker' in navigator)) {
+    console.log('Service Worker tidak didukung.');
+    return;
+  }
+
+
+  navigator.serviceWorker.ready.then(swRegistration => {
+    // Akses ke registrasi Service Worker
+    swRegistration.pushManager.getSubscription()
+      .then(subscription => {
+        if (subscription === null) {
+          // Tidak ada subscription, buat yang baru
+        } else {
+          // Gunakan subscription yang sudah ada
+        }
+      });
+  });
+}
+
 function displayConfirmationNotification() {
   if ('serviceWorker' in navigator) {
     const options = {
@@ -36,18 +56,18 @@ function displayConfirmationNotification() {
       renotify: true,
       actions: [
         {
-          action: 'confirm', 
-          title: 'Iya', 
-          icon: '/src/images/icons/app-icon-96x96.png', 
+          action: 'confirm',
+          title: 'Iya',
+          icon: '/src/images/icons/app-icon-96x96.png',
         },
         {
-          action: 'cancel', 
-          title: 'Batalkan', 
-          icon: '/src/images/icons/app-icon-96x96.png', 
+          action: 'cancel',
+          title: 'Batalkan',
+          icon: '/src/images/icons/app-icon-96x96.png',
         },
       ],
     }
-    
+
     navigator.serviceWorker.ready.then(function (swreg) {
       swreg.showNotification("Berhasil berlangganan! (From SW)", options);
     });
@@ -61,7 +81,7 @@ if ('Notification' in window) {
       if (permission !== 'granted') {
         console.log('No notification permission granted!');
       } else {
-        displayConfirmationNotification();
+        // displayConfirmationNotification();
         console.log('Notification permission granted!');
       }
     });
