@@ -29,17 +29,39 @@ function configurePushSub() {
     return;
   }
 
-
+  let reg;
   navigator.serviceWorker.ready.then(swRegistration => {
-    // Akses ke registrasi Service Worker
-    swRegistration.pushManager.getSubscription()
-      .then(subscription => {
-        if (subscription === null) {
-          // Tidak ada subscription, buat yang baru
-        } else {
-          // Gunakan subscription yang sudah ada
-        }
-      });
+    reg = swRegistration;
+    return swRegistration.pushManager.getSubscription()
+  }).then(subscription => {
+    if (subscription === null) {
+      // Tidak ada subscription, buat yang baru
+      vapidPublicKey = "BONa2hy8asjhYWVivsTTxNY5ZtGxN6VGfAlbvLi9iVDgoXnL5mquqBtoNsJK2jffOY4Idshju3D5AAbVcQwib9k";
+      const convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+
+      return reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedVapidPublicKey,
+      })
+    } else {
+      // Gunakan subscription yang sudah ada
+    }
+  }).then(newSub => {
+    console.log('Berhasil mendapatkan subscription:', newSub);
+    fetch('https://pwa-learn-69738-default-rtdb.asia-southeast1.firebasedatabase.app/subscription.json', {
+      method: 'POST',
+      body: JSON.stringify(newSub),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    })
+  }).then(res => {
+    if (res.ok) {
+      console.log('Subscription berhasil disimpan di server!');
+    }
+  }).catch(err => {
+    console.log('Error:', err);
   });
 }
 
@@ -96,3 +118,4 @@ if ('Notification' in window) {
   });
 }
 
+// fB2C9OVY4u2dmzcScKX1ASVsmuyAM4q9zKEuBzrwX0E
