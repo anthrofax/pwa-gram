@@ -200,22 +200,21 @@ self.addEventListener("sync", (event) => {
       getAllData("sync-posts").then(function (data) {
         for (const feed of data) {
           fetch(
-            "https://us-central1-pwa-learn-69738.cloudfunctions.net/storePostData",
+            "https://storepostdata-5ir6gb5ziq-uc.a.run.app",
             {
               method: "POST",
               body: JSON.stringify(feed),
               headers: {
                 "Content-Type": "application/json",
-                Accept: "application/json",
+                "Accept": "application/json",
               },
             }
           )
             .then((res) => {
               res.json().then((data) => {
-                console.log(data);
+                console.log("Data berhasil diunggah!", data);
                 deleteData("sync-posts", data.id);
               });
-              console.log("Sent data", res);
             })
             .catch((err) => console.log("Error when sending data", err));
         }
@@ -252,3 +251,26 @@ self.addEventListener('notificationclose', (event) => {
   console.log('Notification was closed');
   console.log(notification);
 });
+
+self.addEventListener('push', (event) => {
+  console.log('Push notification received:', event);
+
+  let data = { title: 'New!', content: 'Something new happened!', openUrl: '/' };
+
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  const options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.openUrl,
+    },
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+})

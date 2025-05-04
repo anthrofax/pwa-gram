@@ -103,6 +103,7 @@ if ('Notification' in window) {
       if (permission !== 'granted') {
         console.log('No notification permission granted!');
       } else {
+        configurePushSub();
         // displayConfirmationNotification();
         console.log('Notification permission granted!');
       }
@@ -117,5 +118,3 @@ if ('Notification' in window) {
     button.addEventListener('click', askForNotificationPermission);
   });
 }
-
-// fB2C9OVY4u2dmzcScKX1ASVsmuyAM4q9zKEuBzrwX0E
