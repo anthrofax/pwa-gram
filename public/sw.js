@@ -227,21 +227,26 @@ self.addEventListener('notificationclick', (event) => {
   const notification = event.notification; // Notifikasi yang diklik
   const action = event.action; // Action ID (jika ada)
 
-  // Log informasi tentang notifikasi
-  console.log(notification);
+  if (action !== 'confirm') {
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then(allClients => {
+        // Mencari jendela yang sudah terbuka
+        const client = allClients.find(c => c.visibilityState === 'visible');
 
-  // Menangani klik berdasarkan action
-  if (action === 'confirm') {
-    console.log('Confirm was chosen');
-    notification.close(); // Menutup notifikasi secara manual
-  } else if (action === 'cancel') {
-    console.log('Cancel was chosen');
-    notification.close(); // Menutup notifikasi
-  } else {
-    // Jika pengguna mengklik notifikasi tanpa memilih action
-    console.log('Notification clicked directly');
-    notification.close();
+        if (client) {
+          // Jika jendela sudah terbuka, arahkan ke URL tertentu dan fokuskan
+          return client.navigate('http://localhost:8080').then(() => client.focus());
+        } else {
+          // Jika tidak ada jendela yang terbuka, buka tab baru
+          return clients.openWindow('http://localhost:8080');
+        }
+      }).then(() => {
+        // Tutup notifikasi setelah selesai
+        notification.close();
+      })
+    );
   }
+  
 });
 
 self.addEventListener('notificationclose', (event) => {
@@ -254,6 +259,7 @@ self.addEventListener('notificationclose', (event) => {
 
 self.addEventListener('push', (event) => {
   console.log('Push notification received:', event);
+  
 
   let data = { title: 'New!', content: 'Something new happened!', openUrl: '/' };
 
