@@ -9,9 +9,18 @@ const feedForm = document
   .getElementsByTagName("form")[0];
 const titleInput = document.querySelector("#title");
 const locationInput = document.querySelector("#location");
+const videoPlayer = document.querySelector('#player');
+const canvas = document.querySelector('#canvas');
+const imagePicker = document.querySelector('#image-picker');
+const iamgePickArea = document.querySelector('#pick-image');
+
+function initializeMedia() {
+
+}
 
 function openCreatePostModal() {
   createPostArea.style.display = "block";
+  initializeMedia();
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
