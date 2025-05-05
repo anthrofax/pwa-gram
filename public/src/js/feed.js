@@ -12,7 +12,7 @@ const locationInput = document.querySelector("#location");
 const videoPlayer = document.querySelector('#player');
 const canvas = document.querySelector('#canvas');
 const imagePicker = document.querySelector('#image-picker');
-const iamgePickArea = document.querySelector('#pick-image');
+const imagePickArea = document.querySelector('#pick-image');
 
 function initializeMedia() {
   if (!('mediaDevices' in navigator)) {
@@ -26,12 +26,22 @@ function initializeMedia() {
       if (!getUserMedia) {
         return Promise.reject(new Error('getUserMedia tidak didukung di browser ini'));
       }
-      
+
       return new Promise(function (resolve, reject) {
         getUserMedia.call(navigator, constraints, resolve, reject);
       });
     };
   }
+
+  navigator.mediaDevices.getUserMedia({video: true}).then((stream) => {
+    videoPlayer.srcObject = stream;
+    videoPlayer.style.display = 'block';
+
+  }).catch((error) => {
+    console.error('Error accessing camera:', error);
+
+    imagePicker.style.display = 'block';
+  }) 
 }
 
 function openCreatePostModal() {
@@ -65,6 +75,9 @@ function openCreatePostModal() {
 
 function closeCreatePostModal() {
   createPostArea.style.display = "none";
+  videoPlayer.style.display = "none";
+  imagePickArea.style.display = "none";
+  canvas.style.display = "none";
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);
