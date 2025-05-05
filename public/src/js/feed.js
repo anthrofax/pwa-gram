@@ -10,7 +10,8 @@ const feedForm = document
 const titleInput = document.querySelector("#title");
 const locationInput = document.querySelector("#location");
 const videoPlayer = document.querySelector('#player');
-const canvas = document.querySelector('#canvas');
+const captureButton = document.querySelector('#capture-btn');
+const canvasElement = document.querySelector('#canvas');
 const imagePicker = document.querySelector('#image-picker');
 const imagePickArea = document.querySelector('#pick-image');
 
@@ -43,6 +44,21 @@ function initializeMedia() {
     imagePicker.style.display = 'block';
   }) 
 }
+
+captureButton.addEventListener('click', function (event) {
+  canvasElement.style.display = 'block';
+  videoPlayer.style.display = 'none';
+  captureButton.style.display = 'none';
+
+  const context = canvasElement.getContext('2d');
+
+  context.drawImage(videoPlayer, 0, 0, canvasElement.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvasElement.width))
+
+  videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
+    track.stop();
+  })
+})
+
 
 function openCreatePostModal() {
   createPostArea.style.display = "block";
@@ -77,7 +93,7 @@ function closeCreatePostModal() {
   createPostArea.style.display = "none";
   videoPlayer.style.display = "none";
   imagePickArea.style.display = "none";
-  canvas.style.display = "none";
+  canvasElement.style.display = "none";
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);
