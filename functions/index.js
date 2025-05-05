@@ -24,6 +24,7 @@ function sendPushNotification(subscription) {
   const payload = JSON.stringify({
     title: 'New Post',
     content: 'New post added!',
+    openUrl: '/help',
   });
 
   webPush.sendNotification(pushConfig, payload)

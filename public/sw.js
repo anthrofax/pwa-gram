@@ -199,17 +199,14 @@ self.addEventListener("sync", (event) => {
     event.waitUntil(
       getAllData("sync-posts").then(function (data) {
         for (const feed of data) {
-          fetch(
-            "https://storepostdata-5ir6gb5ziq-uc.a.run.app",
-            {
-              method: "POST",
-              body: JSON.stringify(feed),
-              headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-              },
-            }
-          )
+          fetch("https://storepostdata-5ir6gb5ziq-uc.a.run.app", {
+            method: "POST",
+            body: JSON.stringify(feed),
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          })
             .then((res) => {
               res.json().then((data) => {
                 console.log("Data berhasil diunggah!", data);
@@ -223,60 +220,70 @@ self.addEventListener("sync", (event) => {
   }
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   const notification = event.notification; // Notifikasi yang diklik
   const action = event.action; // Action ID (jika ada)
 
-  if (action !== 'confirm') {
+  if (action !== "confirm") {
     event.waitUntil(
-      clients.matchAll({ type: 'window' }).then(allClients => {
-        // Mencari jendela yang sudah terbuka
-        const client = allClients.find(c => c.visibilityState === 'visible');
+      clients
+        .matchAll({ type: "window" })
+        .then((allClients) => {
+          // Mencari jendela yang sudah terbuka
+          const client = allClients.find(
+            (c) => c.visibilityState === "visible"
+          );
 
-        if (client) {
-          // Jika jendela sudah terbuka, arahkan ke URL tertentu dan fokuskan
-          return client.navigate('http://localhost:8080').then(() => client.focus());
-        } else {
-          // Jika tidak ada jendela yang terbuka, buka tab baru
-          return clients.openWindow('http://localhost:8080');
-        }
-      }).then(() => {
-        // Tutup notifikasi setelah selesai
-        notification.close();
-      })
+          if (client) {
+            // Jika jendela sudah terbuka, arahkan ke URL tertentu dan fokuskan
+            return client
+              .navigate(notification.data.url)
+              .then(() => client.focus());
+          } else {
+            // Jika tidak ada jendela yang terbuka, buka tab baru
+            return client.openWindow(notification.data.url);
+          }
+        })
+        .then(() => {
+          // Tutup notifikasi setelah selesai
+          notification.close();
+        })
     );
   }
-  
 });
 
-self.addEventListener('notificationclose', (event) => {
+self.addEventListener("notificationclose", (event) => {
   const notification = event.notification; // Notifikasi yang ditutup
 
   // Log informasi tentang penutupan
-  console.log('Notification was closed');
+  console.log("Notification was closed");
   console.log(notification);
 });
 
-self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
-  
+self.addEventListener("push", (event) => {
+  console.log("Push notification received:", event);
 
-  let data = { title: 'New!', content: 'Something new happened!', openUrl: '/' };
+  // Fallback data jika payload tidak tersedia
+  let data = {
+    title: "New!",
+    content: "Something new happened!",
+    openUrl: "/",
+  };
 
+  // Memeriksa apakah ada data dalam payload
   if (event.data) {
     data = JSON.parse(event.data.text());
   }
 
+  // Memeriksa apakah ada data dalam payload
   const options = {
     body: data.content,
-    icon: '/src/images/icons/app-icon-96x96.png',
-    badge: '/src/images/icons/app-icon-96x96.png',
+    icon: "/src/images/icons/app-icon-96x96.png",
+    badge: "/src/images/icons/app-icon-96x96.png",
     data: {
       url: data.openUrl,
     },
   };
 
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
-})
+  event.waitUntil(self.registration.showNotification(data.title, options));
+});
