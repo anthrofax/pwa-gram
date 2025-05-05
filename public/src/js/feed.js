@@ -14,6 +14,7 @@ const captureButton = document.querySelector('#capture-btn');
 const canvasElement = document.querySelector('#canvas');
 const imagePicker = document.querySelector('#image-picker');
 const imagePickArea = document.querySelector('#pick-image');
+let picture;
 
 function initializeMedia() {
   if (!('mediaDevices' in navigator)) {
@@ -57,6 +58,8 @@ captureButton.addEventListener('click', function (event) {
   videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
     track.stop();
   })
+
+  picture = dataURItoBlob(canvas.toDataURL());
 })
 
 
@@ -218,8 +221,7 @@ feedForm.addEventListener("submit", function (e) {
         id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
-        image:
-          "https://firebasestorage.googleapis.com/v0/b/pwa-learn-69738.firebasestorage.app/o/sf-boat.jpg?alt=media&token=2104cd34-857b-494e-9297-c61bf20725ff",
+        image: picture,
       };
 
       writeData("sync-posts", newData)

@@ -197,15 +197,19 @@ self.addEventListener("sync", (event) => {
   if (event.tag === "sync-new-posts") {
     console.log("[Service Worker] Syncing new Posts");
     event.waitUntil(
+      // Ambil data dari IndexedDB yang sudah disimpan sebelumnya di table 'sync-posts' (Saat user menggunggah dalam keadaan offline)
       getAllData("sync-posts").then(function (data) {
         for (const feed of data) {
-          fetch("https://storepostdata-5ir6gb5ziq-uc.a.run.app", {
+          const post = new FormData();
+
+          post.append('id', feed.id);
+          post.append('title', feed.title);
+          post.append('location', feed.location);
+          post.append('image', feed.image);
+
+          fetch("https://us-central1-pwa-learn-69738.cloudfunctions.net/storePostData", {
             method: "POST",
-            body: JSON.stringify(feed),
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
+            body: post,
           })
             .then((res) => {
               res.json().then((data) => {
