@@ -9,26 +9,79 @@ const feedForm = document
   .getElementsByTagName("form")[0];
 const titleInput = document.querySelector("#title");
 const locationInput = document.querySelector("#location");
-const videoPlayer = document.querySelector('#player');
-const captureButton = document.querySelector('#capture-btn');
-const canvasElement = document.querySelector('#canvas');
-const imagePicker = document.querySelector('#image-picker');
-const imagePickArea = document.querySelector('#pick-image');
+const videoPlayer = document.querySelector("#player");
+const captureButton = document.querySelector("#capture-btn");
+const canvasElement = document.querySelector("#canvas");
+const imagePicker = document.querySelector("#image-picker");
+const imagePickArea = document.querySelector("#pick-image");
+const getLocationBtn = document.querySelector("#location-btn");
+const getLocationLoader = document.querySelector("#location-loader");
+
+let fetchedLocation;
 let picture;
 
-function initializeMedia() {
-  captureButton.style.display = 'block';
+getLocationBtn.addEventListener("click", function () {
+  if (!("geolocation" in navigator)) {
+    return;
+  }
 
-  if (!('mediaDevices' in navigator)) {
+  getLocationBtn.style.display = "none";
+  getLocationLoader.style.display = "block";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      getLocationBtn.style.display = "inline";
+      getLocationLoader.style.display = "none";
+
+      fetchedLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      locationInput.value = "In Munich";
+      document.querySelector("#manual-location").classList.add("is-focus");
+    },
+    (err) => {
+      console.log(err);
+      getLocationBtn.style.display = "inline";
+      getLocationLoader.style.display = "none";
+
+      fetchedLocation = {
+        lat: null,
+        lng: null,
+      };
+
+      alert(
+        "Gagal mendapatkan lokasi, silahkan memasukkan lokasi anda secara manual"
+      );
+    },
+    {
+      timeout: 7000,
+    }
+  );
+});
+
+function initializeLocation() {
+  if (!('geolocation' in navigator)) {
+    locationBtn.style.display = 'none';
+  }
+}
+
+function initializeMedia() {
+  captureButton.style.display = "block";
+
+  if (!("mediaDevices" in navigator)) {
     navigator.mediaDevices = {};
   }
 
-  if (!('getUserMedia' in navigator.mediaDevices)) {
+  if (!("getUserMedia" in navigator.mediaDevices)) {
     navigator.mediaDevices.getUserMedia = function (constraints) {
-      var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      var getUserMedia =
+        navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
       if (!getUserMedia) {
-        return Promise.reject(new Error('getUserMedia tidak didukung di browser ini'));
+        return Promise.reject(
+          new Error("getUserMedia tidak didukung di browser ini")
+        );
       }
 
       return new Promise(function (resolve, reject) {
@@ -37,40 +90,49 @@ function initializeMedia() {
     };
   }
 
-  navigator.mediaDevices.getUserMedia({video: true}).then((stream) => {
-    videoPlayer.srcObject = stream;
-    videoPlayer.style.display = 'block';
+  navigator.mediaDevices
+    .getUserMedia({ video: true })
+    .then((stream) => {
+      videoPlayer.srcObject = stream;
+      videoPlayer.style.display = "block";
+    })
+    .catch((error) => {
+      console.error("Error accessing camera:", error);
 
-  }).catch((error) => {
-    console.error('Error accessing camera:', error);
-
-    imagePicker.style.display = 'block';
-  }) 
+      imagePicker.style.display = "block";
+    });
 }
 
-captureButton.addEventListener('click', function (event) {
-  canvasElement.style.display = 'block';
-  videoPlayer.style.display = 'none';
-  captureButton.style.display = 'none';
+captureButton.addEventListener("click", function (event) {
+  canvasElement.style.display = "block";
+  videoPlayer.style.display = "none";
+  captureButton.style.display = "none";
 
-  const context = canvasElement.getContext('2d');
+  const context = canvasElement.getContext("2d");
 
-  context.drawImage(videoPlayer, 0, 0, canvasElement.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvasElement.width))
+  context.drawImage(
+    videoPlayer,
+    0,
+    0,
+    canvasElement.width,
+    videoPlayer.videoHeight / (videoPlayer.videoWidth / canvasElement.width)
+  );
 
-  videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
+  videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
     track.stop();
-  })
+  });
 
   picture = dataURItoBlob(canvas.toDataURL());
-})
+});
 
-imagePicker.addEventListener('change', function(event) {
+imagePicker.addEventListener("change", function (event) {
   picture = event.target.files[0];
 });
 
 function openCreatePostModal() {
   createPostArea.style.display = "block";
   initializeMedia();
+  initializeLocation();
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -102,6 +164,8 @@ function closeCreatePostModal() {
   videoPlayer.style.display = "none";
   imagePickArea.style.display = "none";
   canvasElement.style.display = "none";
+  getLocationBtn.style.display = "block";
+  getLocationLoader.style.display = "none";
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);
@@ -189,10 +253,12 @@ if ("indexedDB" in window) {
 function sendData() {
   var id = new Date().toISOString();
   var postData = new FormData();
-  postData.append('id', id);
-  postData.append('title', titleInput.value);
-  postData.append('location', locationInput.value);
-  postData.append('file', picture, id + '.png');
+  postData.append("id", id);
+  postData.append("title", titleInput.value);
+  postData.append("location", locationInput.value);
+  postData.append("locationLatitude", fetchedLocation.lat);
+  postData.append("locationLongitude", fetchedLocation.lng);
+  postData.append("file", picture, id + ".png");
 
   fetch(
     "https://pwa-learn-69738-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
@@ -217,12 +283,13 @@ feedForm.addEventListener("submit", function (e) {
   closeCreatePostModal();
 
   if ("serviceWorker" in navigator && "SyncManager" in window) {
-    console.log('Sync Manager Supported')
+    console.log("Sync Manager Supported");
     navigator.serviceWorker.ready.then((sw) => {
       const newData = {
         id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
+        rawLocation: fetchedLocation,
         image: picture,
       };
 
@@ -242,7 +309,7 @@ feedForm.addEventListener("submit", function (e) {
         });
     });
   } else {
-    console.log("Service Worker not supported")
+    console.log("Service Worker not supported");
     sendData();
   }
 });
