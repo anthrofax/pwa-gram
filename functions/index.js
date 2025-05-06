@@ -1,6 +1,6 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
-const cors = require("cors")({ origin: "true" });
+const cors = require("cors")({ origin: "http://127.0.0.1:8080" });
 const { initializeApp } = require("firebase-admin/app");
 const webPush = require("web-push");
 const {v4: uuid4 } = require("uuid");

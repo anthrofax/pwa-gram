@@ -17,6 +17,8 @@ const imagePickArea = document.querySelector('#pick-image');
 let picture;
 
 function initializeMedia() {
+  captureButton.style.display = 'block';
+
   if (!('mediaDevices' in navigator)) {
     navigator.mediaDevices = {};
   }
@@ -62,6 +64,9 @@ captureButton.addEventListener('click', function (event) {
   picture = dataURItoBlob(canvas.toDataURL());
 })
 
+imagePicker.addEventListener('change', function(event) {
+  picture = event.target.files[0];
+});
 
 function openCreatePostModal() {
   createPostArea.style.display = "block";
@@ -182,21 +187,18 @@ if ("indexedDB" in window) {
 }
 
 function sendData() {
+  var id = new Date().toISOString();
+  var postData = new FormData();
+  postData.append('id', id);
+  postData.append('title', titleInput.value);
+  postData.append('location', locationInput.value);
+  postData.append('file', picture, id + '.png');
+
   fetch(
     "https://pwa-learn-69738-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
     {
       method: "POST",
-      body: JSON.stringify({
-        id: new Date(),
-        title: titleInput.value,
-        location: locationInput.value,
-        image:
-          "https://firebasestorage.googleapis.com/v0/b/pwa-learn-69738.firebasestorage.app/o/sf-boat.jpg?alt=media&token=2104cd34-857b-494e-9297-c61bf20725ff",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      body: postData,
     }
   ).then(function (res) {
     console.log("Sent data", res);
