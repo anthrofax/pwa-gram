@@ -17,13 +17,18 @@ const imagePickArea = document.querySelector("#pick-image");
 const getLocationBtn = document.querySelector("#location-btn");
 const getLocationLoader = document.querySelector("#location-loader");
 
-let fetchedLocation;
+let fetchedLocation = {
+  lat: 0,
+  lng: 0,
+};
 let picture;
 
 getLocationBtn.addEventListener("click", function () {
   if (!("geolocation" in navigator)) {
     return;
   }
+
+  let sawAlert = false;
 
   getLocationBtn.style.display = "none";
   getLocationLoader.style.display = "block";
@@ -46,13 +51,16 @@ getLocationBtn.addEventListener("click", function () {
       getLocationLoader.style.display = "none";
 
       fetchedLocation = {
-        lat: null,
-        lng: null,
+        lat: 0,
+        lng: 0,
       };
-
-      alert(
-        "Gagal mendapatkan lokasi, silahkan memasukkan lokasi anda secara manual"
-      );
+      
+      if (!sawAlert) {
+        alert(
+          "Gagal mendapatkan lokasi, silahkan memasukkan lokasi anda secara manual"
+        );
+        sawAlert = true;
+      }
     },
     {
       timeout: 7000,
@@ -61,8 +69,8 @@ getLocationBtn.addEventListener("click", function () {
 });
 
 function initializeLocation() {
-  if (!('geolocation' in navigator)) {
-    locationBtn.style.display = 'none';
+  if (!("geolocation" in navigator)) {
+    locationBtn.style.display = "none";
   }
 }
 
@@ -130,7 +138,7 @@ imagePicker.addEventListener("change", function (event) {
 });
 
 function openCreatePostModal() {
-  createPostArea.style.display = "block";
+  createPostArea.style.transform = "translateY(0)";
   initializeMedia();
   initializeLocation();
   if (deferredPrompt) {
@@ -160,12 +168,21 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = "none";
   videoPlayer.style.display = "none";
   imagePickArea.style.display = "none";
   canvasElement.style.display = "none";
   getLocationBtn.style.display = "block";
   getLocationLoader.style.display = "none";
+
+  if (videoPlayer.srcObect) {
+    videoPlayer.srcObject.getVideoTracks().forEach((track) => {
+      track.stop();
+    });
+  }
+
+  setTimeout(() => {
+    createPostArea.style.transform = "translateY(100vh)";
+  }, 1);
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);

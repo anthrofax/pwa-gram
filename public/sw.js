@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utils.js");
 
-var CACHE_STATIC_NAME = "static-v22";
+var CACHE_STATIC_NAME = "static-v23";
 var CACHE_DYNAMIC_NAME = "dynamic-v2";
 var STATIC_FILES = [
   "/",
@@ -36,34 +36,34 @@ var STATIC_FILES = [
 // }
 
 self.addEventListener("install", function (event) {
-console.log("[Service Worker] Installing Service Worker ...", event);
+  console.log("[Service Worker] Installing Service Worker ...", event);
 
-// Install app shell by caching static assets
-event.waitUntil(
-  caches.open(CACHE_STATIC_NAME).then(function (cache) {
-    console.log("[Service Worker] Precaching App Shell");
-    cache.addAll(STATIC_FILES);
-  })
-);
+  // Install app shell by caching static assets
+  event.waitUntil(
+    caches.open(CACHE_STATIC_NAME).then(function (cache) {
+      console.log("[Service Worker] Precaching App Shell");
+      cache.addAll(STATIC_FILES);
+    })
+  );
 });
 
 self.addEventListener("activate", function (event) {
-console.log("[Service Worker] Activating Service Worker ....", event);
+  console.log("[Service Worker] Activating Service Worker ....", event);
 
-// Remove previous cached data (So we get fresh data everytime we update the code on the frontend)
-event.waitUntil(
-  caches.keys().then(function (keyList) {
-    return Promise.all(
-      keyList.map(function (key) {
-        if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME) {
-          console.log("[Service Worker] Removing old cache.", key);
-          return caches.delete(key);
-        }
-      })
-    );
-  })
-);
-return self.clients.claim();
+  // Remove previous cached data (So we get fresh data everytime we update the code on the frontend)
+  event.waitUntil(
+    caches.keys().then(function (keyList) {
+      return Promise.all(
+        keyList.map(function (key) {
+          if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME) {
+            console.log("[Service Worker] Removing old cache.", key);
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  return self.clients.claim();
 });
 
 function isInArray(string, array) {
